@@ -1,0 +1,27 @@
+name: Coleta de teste (temporário)
+on:
+  push:
+    branches: [claude/project-thread-uo637r]
+    paths: [.github/workflows/coleta-teste-temporario.yml]
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python -m coletor.coletar --max-topicos 12 --max-paginas 1
+      - run: python -m coletor.exportar
+      - name: Amostra
+        run: |
+          python - <<'PY'
+          import json
+          d = json.load(open("site/dados/topicos.json"))
+          for t in d[:12]:
+              print(t["id"], t["forum"], t["respostas"], t["data"], t["temas"], "|", t["titulo"])
+              print("   ", t["texto"][:200].replace("\n", " "))
+          PY
+          sqlite3 dados/forum.db "select topico_id, posicao, post_id, autor, data, length(texto) from posts limit 25"
+          python -m coletor.buscar "treino" --limite 3
