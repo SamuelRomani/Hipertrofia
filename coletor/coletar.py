@@ -67,12 +67,14 @@ MAX_PAGINAS_POR_TOPICO = 200
 
 
 def coletar_topico(cliente, url):
-    posts, titulo, pagina, vistas = [], None, url, set()
+    posts, titulo, pagina, vistas, ids = [], None, url, set(), set()
     while pagina and pagina not in vistas and len(vistas) < MAX_PAGINAS_POR_TOPICO:
         vistas.add(pagina)
         info, novos, pagina = ler_topico(cliente.get(pagina), pagina)
         titulo = titulo or info["titulo"]
-        posts.extend(novos)
+        # Posts em destaque (ex.: melhor resposta) se repetem em todas as páginas.
+        posts.extend(p for p in novos if p["id"] is None or p["id"] not in ids)
+        ids.update(p["id"] for p in novos)
         if len(vistas) % 10 == 0:
             print(f"    … {len(vistas)} páginas, {len(posts)} posts", flush=True)
     return titulo, posts

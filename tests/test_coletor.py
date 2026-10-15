@@ -207,3 +207,18 @@ def test_paginas_reais_salvas():
         topicos, prox = ler_lista_de_topicos(f.read(), BASE + "/forum/forum/4-treinamento/")
     assert len(topicos) >= 25 and all(t["respostas"] is not None for t in topicos)
     assert prox.endswith("/page/2/")
+
+
+def test_post_em_destaque_repetido_entra_uma_vez():
+    url = f"{BASE}/forum/topic/1-x/"
+    paginas = {
+        url: topico_v4([(1, "a", "pergunta"), (2, "b", "melhor resposta")], proxima=url + "page/2/"),
+        url + "page/2/": topico_v4([(2, "b", "melhor resposta"), (3, "c", "outra")]),
+    }
+
+    class C:
+        def get(self, u):
+            return paginas[u]
+
+    _, posts = coletar.coletar_topico(C(), url)
+    assert [p["id"] for p in posts] == [1, 2, 3]
