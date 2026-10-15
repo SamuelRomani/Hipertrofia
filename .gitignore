@@ -3,3 +3,4 @@ __pycache__/
 .pytest_cache/
 dados/
 site/dados/
+tests/paginas_reais/

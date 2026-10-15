@@ -63,12 +63,18 @@ def url_da_pagina(inicio, n):
     return inicio if n == 1 else inicio.rstrip("/") + f"/page/{n}/"
 
 
+MAX_PAGINAS_POR_TOPICO = 200
+
+
 def coletar_topico(cliente, url):
-    posts, titulo, pagina = [], None, url
-    while pagina:
+    posts, titulo, pagina, vistas = [], None, url, set()
+    while pagina and pagina not in vistas and len(vistas) < MAX_PAGINAS_POR_TOPICO:
+        vistas.add(pagina)
         info, novos, pagina = ler_topico(cliente.get(pagina), pagina)
         titulo = titulo or info["titulo"]
         posts.extend(novos)
+        if len(vistas) % 10 == 0:
+            print(f"    … {len(vistas)} páginas, {len(posts)} posts", flush=True)
     return titulo, posts
 
 

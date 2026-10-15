@@ -35,7 +35,9 @@ def topico_v4(posts, proxima=None):
 def topico_v5(posts):
     arts = "".join(
         f"""<article id="elComment_{pid}" class="ipsEntry">
-        <header><div class="ipsEntry__username"><a href="{BASE}/forum/profile/2-y/">{autor}</a></div>
+        <aside class="ipsEntry__author-column"><h3 class="ipsEntry__username"><span class="ipsUsername">{autor}</span></h3>
+        <ul class="ipsEntry__authorStats"><li><a href="{BASE}/forum/profile/2-y/badges/">9 Medalhas</a></li></ul></aside>
+        <header>
         <time datetime="2026-08-19T12:46:00Z">19/08</time></header>
         <div class="ipsRichText" data-role="commentContent"><p>{texto}</p></div></article>"""
         for pid, autor, texto in posts
@@ -170,3 +172,38 @@ def test_historico_avanca_em_varias_execucoes_pequenas(site):
     assert topicos_salvos(site) == {i: 1 for i in range(1, 7)}
     con = db.conectar(str(site.tmp / "f.db"))
     assert db.ler_estado(con, 4) == (4, True)
+
+
+def test_lista_ignora_linha_de_subforum():
+    html = f"""<ol><li class="ipsData__item"><a href="{BASE}/forum/forum/40-artigos/">Artigos</a> 21,2k posts
+      <a href="{BASE}/forum/topic/5-ultimo-artigo/">Último artigo</a></li></ol>""" + lista([(9, 0)])
+    topicos, _ = ler_lista_de_topicos(html, BASE)
+    assert [(t["id"], t["respostas"]) for t in topicos] == [(9, 0)]
+
+
+def test_topico_com_proxima_pagina_repetida_nao_trava():
+    url = f"{BASE}/forum/topic/1-x/"
+    pagina = topico_v4([(1, "a", "oi")], proxima=url)
+
+    class C:
+        def get(self, u):
+            return pagina
+
+    _, posts = coletar.coletar_topico(C(), url)
+    assert len(posts) == 1
+
+
+def test_paginas_reais_salvas():
+    """Páginas reais do fórum (Invision 5), se o diagnóstico tiver sido salvo localmente."""
+    import os
+    caminho = os.path.join(os.path.dirname(__file__), "paginas_reais")
+    if not os.path.isdir(caminho):
+        pytest.skip("sem páginas reais")
+    with open(os.path.join(caminho, "topico.html"), encoding="utf-8") as f:
+        _, posts, _ = ler_topico(f.read(), BASE)
+    assert posts[0]["autor"] == "e_ddie" and posts[1]["autor"] == "diogooliveira"
+    assert "Medalhas" not in {p["autor"] for p in posts}
+    with open(os.path.join(caminho, "lista.html"), encoding="utf-8") as f:
+        topicos, prox = ler_lista_de_topicos(f.read(), BASE + "/forum/forum/4-treinamento/")
+    assert len(topicos) >= 25 and all(t["respostas"] is not None for t in topicos)
+    assert prox.endswith("/page/2/")
