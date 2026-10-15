@@ -20,6 +20,9 @@ from . import db
 from .parser import ler_lista_de_topicos, ler_topico
 
 
+MAX_FALHAS_SEGUIDAS = 5
+
+
 class Cliente:
     def __init__(self, config):
         self.base = config["base_url"]
@@ -39,7 +42,7 @@ class Cliente:
         espera = self.intervalo - (time.monotonic() - self._ultima)
         if espera > 0:
             time.sleep(espera)
-        for tentativa in range(4):
+        for tentativa in range(3):
             self._ultima = time.monotonic()
             self.requisicoes += 1
             try:
@@ -51,8 +54,8 @@ class Cliente:
                     return resp.text
                 if resp.status_code not in (429, 500, 502, 503, 504):
                     resp.raise_for_status()
-                print(f"  HTTP {resp.status_code}, aguardando para tentar de novo", flush=True)
-            time.sleep(30 * (tentativa + 1))
+                print(f"  HTTP {resp.status_code} em {url}, aguardando para tentar de novo", flush=True)
+            time.sleep(15 * (tentativa + 1))
         raise RuntimeError(f"Falhou após várias tentativas: {url}")
 
 
@@ -83,7 +86,7 @@ def main(argv=None):
     con = db.conectar(args.db)
     cliente = Cliente(config)
     agora = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    baixados = falhas = 0
+    baixados = falhas = seguidas = 0
 
     for forum in config["foruns"]:
         if baixados >= args.max_topicos:
@@ -111,13 +114,18 @@ def main(argv=None):
                 try:
                     titulo, posts = coletar_topico(cliente, t["url"])
                 except Exception as erro:  # um tópico com problema não derruba a coleta
-                    falhas += 1
-                    print(f"  falhou {t['url']}: {erro}", flush=True)
-                    continue
+                    erro_topico = str(erro)
+                    posts = []
+                else:
+                    erro_topico = "nenhum post lido"
                 if not posts:
                     falhas += 1
-                    print(f"  nenhum post lido em {t['url']}", flush=True)
+                    seguidas += 1
+                    print(f"  falhou {t['url']}: {erro_topico}", flush=True)
+                    if seguidas >= MAX_FALHAS_SEGUIDAS:
+                        sys.exit(f"{seguidas} falhas seguidas; o site pode estar bloqueando ou mudou de layout.")
                     continue
+                seguidas = 0
                 for p in posts:
                     p["autor"] = db.anonimizar(p["autor"], sal)
                 t.update(forum_id=forum["id"], forum=forum["nome"], titulo=t["titulo"] or titulo)
