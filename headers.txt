@@ -1,0 +1,48 @@
+HTTP/2 200 
+date: Thu, 15 Oct 2026 15:30:20 GMT
+content-type: text/plain
+content-length: 786
+last-modified: Sun, 23 Aug 2026 20:03:51 GMT
+etag: "6a8b5227-312"
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+permissions-policy: geolocation=(self), microphone=(), camera=()
+content-security-policy: frame-ancestors 'self'
+referrer-policy: strict-origin-when-cross-origin
+alt-svc: h3=":443"; ma=86400
+accept-ranges: bytes
+-----
+HTTP/2 200 
+date: Thu, 15 Oct 2026 15:30:23 GMT
+content-type: text/html;charset=UTF-8
+set-cookie: ips4_IPSSessionFront=sv1tink9v5bfdofm2rc2mtmt03; path=/; secure; HttpOnly
+x-ips-loggedin: 0
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+vary: Cookie, Accept-Encoding
+x-xss-protection: 0
+x-xss-protection: 1; mode=block
+last-modified: Thu, 15 Oct 2026 15:30:23 GMT
+expires: Thu, 15 Oct 2026 15:45:23 GMT
+cache-control: no-cache="Set-Cookie", max-age=900, public, s-maxage=900, stale-while-revalidate=30, stale-if-error=30
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN
+x-content-type-options: nosniff
+-----
+HTTP/2 200 
+date: Thu, 15 Oct 2026 15:30:27 GMT
+content-type: text/html;charset=UTF-8
+set-cookie: ips4_IPSSessionFront=kvp9ri64van3g3frk8u0knde7o; path=/; secure; HttpOnly
+x-ips-loggedin: 0
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+vary: Cookie, Accept-Encoding
+x-xss-protection: 0
+x-xss-protection: 1; mode=block
+last-modified: Thu, 15 Oct 2026 15:30:27 GMT
+expires: Thu, 15 Oct 2026 15:45:27 GMT
+cache-control: no-cache="Set-Cookie", max-age=900, public, s-maxage=900, stale-while-revalidate=30, stale-if-error=30
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+x-frame-options: SAMEORIGIN
+x-content-type-options: nosniff
+-----
