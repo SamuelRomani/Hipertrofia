@@ -2,6 +2,9 @@
   const POR_PAGINA = 20;
   const $ = (id) => document.getElementById(id);
   const semAcento = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  const PARADAS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'as', 'os', 'em', 'no', 'na', 'para', 'pra', 'com', 'que', 'um', 'uma', 'por', 'se', 'ou']);
+  // "250 mg", "250mg" e "250MG" viram o mesmo termo.
+  const tokenizar = (texto) => texto.replace(/(\d+)\s*mg\b/gi, '$1mg').split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const escapar = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
   let topicos = [], indice, temasAtivos = new Set(), lista = [], mostrados = 0;
@@ -10,14 +13,20 @@
     indice = new MiniSearch({
       fields: ['titulo', 'texto'],
       storeFields: ['id'],
-      processTerm: (t) => (t.length < 2 ? null : semAcento(t)),
-      searchOptions: { boost: { titulo: 3 }, prefix: true, fuzzy: 0.15, combineWith: 'AND' },
+      tokenize: tokenizar,
+      processTerm: (t) => (t.length < 2 || PARADAS.has(semAcento(t)) ? null : semAcento(t)),
+      // Erros de digitação só em palavras longas e sem números ("250mg" não vira "200mg", "testo" não vira "teste").
+      searchOptions: {
+        boost: { titulo: 3 }, combineWith: 'AND',
+        prefix: (termo) => !/\d/.test(termo),
+        fuzzy: (termo) => (termo.length > 5 && !/\d/.test(termo) ? 0.2 : false),
+      },
     });
     indice.addAll(topicos);
   };
 
   const trecho = (t, termos) => {
-    const texto = t.texto.replace(/\s+/g, ' ');
+    const texto = t.texto.replace(/\s+/g, ' ').replace(/(\d+)\s*mg\b/gi, '$1mg');
     const norm = semAcento(texto);
     let pos = -1;
     for (const termo of termos) { pos = norm.indexOf(termo); if (pos >= 0) break; }
@@ -109,6 +118,61 @@
     $('mais').onclick = mostrar;
     buscar();
   };
+
+  // Faixas típicas de laboratório para homens adultos; variam entre laboratórios.
+  const REFERENCIA = {
+    'Testosterona total': '264–916', 'Testosterona livre': '5–21', 'Estradiol': '10–40', 'Hematócrito': '41–50',
+    'Hemoglobina': '13,5–17,5', 'HDL': 'acima de 40', 'LDL': 'abaixo de 130', 'TGP / ALT': 'abaixo de 41',
+    'PSA': 'abaixo de 2,5', 'LH': '1,7–8,6',
+  };
+  let analise;
+  const fmt = (n) => (n === undefined ? '–' : Number(n).toLocaleString('pt-BR', { maximumFractionDigits: 1 }));
+
+  const mostrarAnalise = () => {
+    if (!analise) return;
+    const g = $('grupo').value;
+    const total = analise.posts_por_grupo[g] || 0;
+    const p = analise.perfil, tol = analise.tolerancia;
+    $('grupo-info').textContent = g === 'Perfil parecido'
+      ? `${analise.autores_com_perfil_parecido} autores dizem ter ${p.idade} ± ${tol.idade} anos e ${p.peso_kg} ± ${tol.peso_kg} kg (e altura de ${p.altura_cm} ± ${tol.altura_cm} cm, quando informada); ${total} posts deles falam de testosterona ou ciclo.`
+      : `${total.toLocaleString('pt-BR')} posts analisados neste grupo.`;
+    const col = analise.colaterais[g] || [];
+    const maior = Math.max(1, ...col.map((c) => c.posts));
+    $('colaterais').innerHTML = col.length ? col.map((c) => `
+      <li><div class="barra-topo"><span>${escapar(c.nome)}</span><span>${c.posts} post${c.posts === 1 ? '' : 's'}${total ? ` · ${Math.round((100 * c.posts) / total)}%` : ''}</span></div>
+      <div class="barra"><span style="width:${(100 * c.posts) / maior}%"></span></div>
+      <div class="exemplos">${(analise.exemplos_colaterais[c.nome] || []).slice(0, 3).map((e) => `<a href="${escapar(e.url)}" target="_blank" rel="noopener">${escapar(e.titulo)}</a>`).join(' · ')}</div></li>`).join('')
+      : '<li class="sub">Ainda não há relatos suficientes neste grupo.</li>';
+    const ex = Object.entries(analise.exames[g] || {}).sort((a, b) => b[1].n - a[1].n);
+    $('exames').innerHTML = ex.length
+      ? '<tr><th>Exame</th><th>Relatos</th><th>Mediana</th><th>Metade dos relatos entre</th><th>Referência típica</th></tr>' +
+        ex.map(([nome, r]) => `<tr><td>${escapar(nome)}</td><td class="num">${r.n}</td><td class="num">${fmt(r.mediana)} ${r.unidade}</td>
+          <td class="num">${r.p25 !== undefined ? `${fmt(r.p25)}–${fmt(r.p75)}` : 'poucos dados'}</td><td>${REFERENCIA[nome] || ''} ${r.unidade}</td></tr>`).join('')
+      : '<tr><td class="sub">Nenhum valor de exame encontrado neste grupo.</td></tr>';
+    const gk = analise.ganhos_kg[g];
+    $('ganhos').textContent = gk && gk.n
+      ? `${gk.n} relatos; mediana de ${fmt(gk.mediana)} kg${gk.p25 !== undefined ? ` (metade entre ${fmt(gk.p25)} e ${fmt(gk.p75)} kg)` : ''}. Ganho de peso inclui água e gordura, não só músculo, e boa parte costuma ir embora depois que a dose cai.`
+      : 'Nenhum relato de ganho em kg encontrado neste grupo.';
+    $('doses').textContent = analise.doses_testosterona_mg.length
+      ? analise.doses_testosterona_mg.map((d) => `${d.mg} mg (${d.mencoes})`).join(' · ') + ' — número de menções, sem distinguir dose semanal de aplicação única.'
+      : 'Nenhuma dose encontrada.';
+  };
+
+  const abrirAba = (qual) => {
+    $('aba-busca').setAttribute('aria-selected', String(qual === 'busca'));
+    $('aba-analise').setAttribute('aria-selected', String(qual === 'analise'));
+    $('painel-busca').hidden = qual !== 'busca';
+    $('painel-analise').hidden = qual !== 'analise';
+    if (qual === 'analise') mostrarAnalise();
+  };
+  $('aba-busca').onclick = () => abrirAba('busca');
+  $('aba-analise').onclick = () => abrirAba('analise');
+  $('grupo').onchange = mostrarAnalise;
+  for (const b of document.querySelectorAll('.atalhos button')) {
+    b.onclick = () => { $('q').value = b.dataset.q; if (indice) buscar(); };
+  }
+  fetch('dados/analise.json').then((r) => (r.ok ? r.json() : null)).then((a) => { analise = a; mostrarAnalise(); }).catch(() => {});
+  if (location.hash === '#analise') abrirAba('analise');
 
   iniciar().catch((e) => {
     $('meta').textContent = 'Não foi possível carregar a base. Rode o workflow "Coletar e publicar" no GitHub Actions.';

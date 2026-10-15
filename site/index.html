@@ -11,7 +11,17 @@
   <h1>Busca no fórum Hipertrofia.org</h1>
   <p class="sub" id="meta">Carregando a base…</p>
 </header>
-<main>
+<nav class="abas" role="tablist">
+  <button role="tab" id="aba-busca" aria-selected="true">Busca</button>
+  <button role="tab" id="aba-analise" aria-selected="false">Análise testosterona</button>
+</nav>
+<main id="painel-busca">
+  <div class="atalhos">Buscas rápidas:
+    <button type="button" data-q="TRT">TRT</button>
+    <button type="button" data-q="250mg testo">250 mg de testo</button>
+    <button type="button" data-q="hematócrito">hematócrito</button>
+    <button type="button" data-q="ginecomastia">ginecomastia</button>
+  </div>
   <form id="form" role="search" onsubmit="return false">
     <input id="q" type="search" placeholder="Ex.: creatina jiu jitsu, treino concorrente, bulking crossfit" autocomplete="off" autofocus>
     <div class="linha">
@@ -27,6 +37,30 @@
   <p id="contagem" class="sub"></p>
   <ol id="resultados"></ol>
   <button id="mais" hidden>Mostrar mais</button>
+</main>
+<main id="painel-analise" hidden>
+  <div class="aviso">
+    <strong>Relatos de fórum, não dados clínicos.</strong> Os números abaixo saem de posts em que as pessoas
+    contam a própria experiência: não há confirmação de dose, produto, exame ou laboratório. Servem para levantar
+    perguntas para o seu médico, não para definir dose ou protocolo. Testosterona exógena suprime a produção
+    natural e pode afetar fertilidade, sangue, coração e fígado; só faça com prescrição e exames de acompanhamento.
+  </div>
+  <div class="linha">
+    <select id="grupo" aria-label="Grupo">
+      <option value="TRT">Reposição (TRT)</option>
+      <option value="Ciclo">Ciclo (doses acima de reposição)</option>
+      <option value="Perfil parecido">Autores com perfil parecido com o seu</option>
+    </select>
+  </div>
+  <p id="grupo-info" class="sub"></p>
+  <h2 class="secao">Colaterais mais citados</h2>
+  <ol id="colaterais" class="barras"></ol>
+  <h2 class="secao">Exames relatados</h2>
+  <div class="tabela"><table id="exames"></table></div>
+  <h2 class="secao">Ganho de peso relatado</h2>
+  <p id="ganhos"></p>
+  <h2 class="secao">Doses de testosterona mais mencionadas</h2>
+  <p id="doses" class="sub"></p>
 </main>
 <footer>
   Conteúdo público do <a href="https://www.hipertrofia.org/forum/" target="_blank" rel="noopener">fórum Hipertrofia.org</a>,

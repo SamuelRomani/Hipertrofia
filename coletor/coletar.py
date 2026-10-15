@@ -96,21 +96,22 @@ def main(argv=None):
     agora = datetime.now(timezone.utc).isoformat(timespec="seconds")
     baixados = falhas = seguidas = 0
 
-    for forum in config["foruns"]:
-        if baixados >= args.max_topicos:
-            break
-        print(f"== {forum['nome']}", flush=True)
+    # Cada subfórum recebe uma parte da cota; o que um não usar passa para os seguintes.
+    foruns = config["foruns"]
+    for i, forum in enumerate(foruns):
+        limite = baixados + (args.max_topicos - baixados) // (len(foruns) - i)
+        print(f"== {forum['nome']} (até {limite - baixados} tópicos)", flush=True)
         inicio = urljoin(config["base_url"], forum["url"])
         antiga, completo = db.ler_estado(con, forum["id"])
         # Fase "novidades": da página 1 em diante, até achar uma página sem mudanças.
         # Fase "histórico": continua de onde a coleta anterior parou nas páginas antigas.
         fase, n = "novidades", 1
-        while baixados < args.max_topicos:
+        while baixados < limite:
             url = url_da_pagina(inicio, n)
             topicos, proxima = ler_lista_de_topicos(cliente.get(url), url)
             mudou_algo = interrompido = False
             for t in topicos:
-                if baixados >= args.max_topicos:
+                if baixados >= limite:
                     interrompido = True
                     break
                 # A listagem vem ordenada pela última atividade: tópico conhecido com o

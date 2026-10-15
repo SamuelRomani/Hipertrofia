@@ -8,7 +8,7 @@ on:
     inputs:
       max_topicos:
         description: "Máximo de tópicos baixados nesta execução"
-        default: "500"
+        default: "100"
       max_paginas:
         description: "Máximo de páginas de listagem por subfórum (0 = sem limite)"
         default: "0"
@@ -51,7 +51,7 @@ jobs:
           SAL_ANONIMIZACAO: ${{ secrets.SAL_ANONIMIZACAO }}
         run: >
           python -m coletor.coletar
-          --max-topicos "${{ inputs.max_topicos || '500' }}"
+          --max-topicos "${{ inputs.max_topicos || '100' }}"
           --max-paginas "${{ inputs.max_paginas || '0' }}"
 
       - name: Salvar a base no branch "dados"
@@ -68,7 +68,9 @@ jobs:
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" dados
 
       - name: Gerar os dados da página de busca
-        run: python -m coletor.exportar
+        run: |
+          python -m coletor.exportar
+          python -m coletor.analise
 
       - uses: actions/upload-pages-artifact@v3
         with:

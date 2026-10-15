@@ -3,22 +3,133 @@
   "user_agent": "HipertrofiaPesquisaBot/1.0 (+https://github.com/SamuelRomani/Hipertrofia; uso pessoal de pesquisa)",
   "intervalo_entre_requisicoes_s": 2.0,
   "foruns": [
-    {"id": 4, "nome": "Treinamento", "url": "/forum/forum/4-treinamento/"},
-    {"id": 6, "nome": "Dieta e suplementação", "url": "/forum/forum/6-dieta-e-suplementa%C3%A7%C3%A3o/"},
-    {"id": 37, "nome": "Musculação em geral", "url": "/forum/forum/37-muscula%C3%A7%C3%A3o-em-geral/"},
-    {"id": 46, "nome": "Saúde e bem estar", "url": "/forum/forum/46-sa%C3%BAde-e-bem-estar/"}
+    {
+      "id": 16,
+      "nome": "Esteroides e ergogênicos",
+      "url": "/forum/forum/16-esteroides-anabolizantes-e-outros-ergog%C3%AAnicos/"
+    }
+  ],
+  "foruns_pausados": [
+    {
+      "id": 4,
+      "nome": "Treinamento",
+      "url": "/forum/forum/4-treinamento/"
+    },
+    {
+      "id": 6,
+      "nome": "Dieta e suplementação",
+      "url": "/forum/forum/6-dieta-e-suplementa%C3%A7%C3%A3o/"
+    },
+    {
+      "id": 37,
+      "nome": "Musculação em geral",
+      "url": "/forum/forum/37-muscula%C3%A7%C3%A3o-em-geral/"
+    },
+    {
+      "id": 46,
+      "nome": "Saúde e bem estar",
+      "url": "/forum/forum/46-sa%C3%BAde-e-bem-estar/"
+    }
   ],
   "max_caracteres_por_topico_no_site": 6000,
   "temas": {
-    "Jiu-jitsu / luta": ["jiu", "jiujitsu", "bjj", "tatame", "luta", "muay thai", "mma"],
-    "CrossFit": ["crossfit", "cross fit", "wod", "box"],
-    "Treino concorrente": ["concorrente", "aerobico", "cardio", "corrida", "interferencia"],
-    "Bulking / superávit": ["bulking", "bulk", "superavit", "ganhar massa", "ganho de massa"],
-    "Cutting / déficit": ["cutting", "deficit", "emagrecer", "secar", "perder gordura"],
-    "Proteína": ["proteina", "whey", "albumina"],
-    "Creatina": ["creatina"],
-    "Recuperação / sono": ["recuperacao", "sono", "dormir", "descanso", "overtraining", "fadiga"],
-    "Hormônios": ["testosterona", "estradiol", "cortisol", "tireoide", "tsh", "hormonio"],
-    "Lesão / dor": ["lesao", "dor", "tendinite", "ombro", "joelho", "lombar"]
+    "TRT / reposição": [
+      "trt",
+      "reposicao hormonal",
+      "reposicao de testosterona",
+      "terapia de reposicao"
+    ],
+    "Ciclo / esteroides": [
+      "ciclo",
+      "durateston",
+      "deca",
+      "enantato",
+      "cipionato",
+      "oxandrolona",
+      "anabolizante",
+      "anabolizantes",
+      "esteroide",
+      "esteroides",
+      "testo",
+      "testosterona"
+    ],
+    "Jiu-jitsu / luta": [
+      "jiu",
+      "jiujitsu",
+      "bjj",
+      "tatame",
+      "luta",
+      "muay thai",
+      "mma"
+    ],
+    "CrossFit": [
+      "crossfit",
+      "cross fit",
+      "wod",
+      "box"
+    ],
+    "Treino concorrente": [
+      "concorrente",
+      "aerobico",
+      "cardio",
+      "corrida",
+      "interferencia"
+    ],
+    "Bulking / superávit": [
+      "bulking",
+      "bulk",
+      "superavit",
+      "ganhar massa",
+      "ganho de massa"
+    ],
+    "Cutting / déficit": [
+      "cutting",
+      "deficit",
+      "emagrecer",
+      "secar",
+      "perder gordura"
+    ],
+    "Proteína": [
+      "proteina",
+      "whey",
+      "albumina"
+    ],
+    "Creatina": [
+      "creatina"
+    ],
+    "Recuperação / sono": [
+      "recuperacao",
+      "sono",
+      "dormir",
+      "descanso",
+      "overtraining",
+      "fadiga"
+    ],
+    "Hormônios": [
+      "testosterona",
+      "estradiol",
+      "cortisol",
+      "tireoide",
+      "tsh",
+      "hormonio"
+    ],
+    "Lesão / dor": [
+      "lesao",
+      "dor",
+      "tendinite",
+      "ombro",
+      "joelho",
+      "lombar"
+    ]
+  },
+  "perfil": {
+    "idade": 29,
+    "altura_cm": 173,
+    "peso_kg": 80,
+    "tolerancia": {
+      "idade": 5,
+      "altura_cm": 6,
+      "peso_kg": 10
+    }
   }
 }
