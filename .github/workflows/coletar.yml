@@ -1,0 +1,84 @@
+name: Coletar e publicar
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # toda segunda-feira, 03h de Brasília
+  workflow_dispatch:
+    inputs:
+      max_topicos:
+        description: "Máximo de tópicos baixados nesta execução"
+        default: "500"
+      max_paginas:
+        description: "Máximo de páginas de listagem por subfórum (0 = sem limite)"
+        default: "0"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: coleta
+  cancel-in-progress: false
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Baixar a base da coleta anterior (branch "dados")
+        run: |
+          mkdir -p dados
+          if git fetch --depth 1 origin dados; then
+            git show FETCH_HEAD:forum.db.gz | gunzip > dados/forum.db
+            echo "Base anterior: $(du -h dados/forum.db | cut -f1)"
+          else
+            echo "Primeira coleta: começando com a base vazia"
+          fi
+
+      - name: Coletar
+        env:
+          SAL_ANONIMIZACAO: ${{ secrets.SAL_ANONIMIZACAO }}
+        run: >
+          python -m coletor.coletar
+          --max-topicos "${{ inputs.max_topicos || '500' }}"
+          --max-paginas "${{ inputs.max_paginas || '0' }}"
+
+      - name: Salvar a base no branch "dados"
+        if: ${{ !cancelled() && hashFiles('dados/forum.db') != '' }}
+        run: |
+          # Um único commit sobrescrito a cada coleta, para o histórico do Git não crescer.
+          tmp=$(mktemp -d)
+          gzip -9 -c dados/forum.db > "$tmp/forum.db.gz"
+          cd "$tmp"
+          git init -q -b dados
+          git add forum.db.gz
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -q -m "Base do fórum atualizada em $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" dados
+
+      - name: Gerar os dados da página de busca
+        run: python -m coletor.exportar
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  publicar:
+    needs: coletar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

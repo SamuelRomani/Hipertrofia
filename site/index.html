@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Busca Hipertrofia</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Busca no fórum Hipertrofia.org</h1>
+  <p class="sub" id="meta">Carregando a base…</p>
+</header>
+<main>
+  <form id="form" role="search" onsubmit="return false">
+    <input id="q" type="search" placeholder="Ex.: creatina jiu jitsu, treino concorrente, bulking crossfit" autocomplete="off" autofocus>
+    <div class="linha">
+      <select id="forum" aria-label="Subfórum"><option value="">Todos os subfóruns</option></select>
+      <select id="ordem" aria-label="Ordenar">
+        <option value="relevancia">Mais relevantes</option>
+        <option value="recentes">Mais recentes</option>
+        <option value="respostas">Mais respondidos</option>
+      </select>
+    </div>
+    <div id="temas" class="temas" aria-label="Temas"></div>
+  </form>
+  <p id="contagem" class="sub"></p>
+  <ol id="resultados"></ol>
+  <button id="mais" hidden>Mostrar mais</button>
+</main>
+<footer>
+  Conteúdo público do <a href="https://www.hipertrofia.org/forum/" target="_blank" rel="noopener">fórum Hipertrofia.org</a>,
+  coletado para pesquisa pessoal. Autores não são identificados; abra o tópico original para ver o contexto completo.
+  Relatos de fórum não substituem orientação médica ou estudos científicos.
+</footer>
+<script src="vendor/minisearch-7.1.0.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
