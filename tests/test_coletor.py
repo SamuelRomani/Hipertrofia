@@ -122,7 +122,7 @@ def site(monkeypatch, tmp_path):
 
     monkeypatch.setattr(coletar, "Cliente", ClienteFalso)
     cfg = json.load(open("config.json", encoding="utf-8"))
-    cfg["foruns"] = cfg["foruns"][:1]
+    cfg["foruns"] = [f for f in cfg["foruns"] + cfg.get("foruns_pausados", []) if f["id"] == 4]
     (tmp_path / "config.json").write_text(json.dumps(cfg))
     falso.args = ["--config", str(tmp_path / "config.json"), "--db", str(tmp_path / "f.db")]
     falso.tmp = tmp_path

@@ -9,7 +9,13 @@ Ferramenta que roda inteira no GitHub para pesquisar o conteúdo público do
 - **Busca (GitHub Pages):** uma página com busca por palavras (ignora acentos e
   aceita palavras incompletas), filtro por subfórum e por tema (jiu-jitsu, CrossFit,
   treino concorrente, bulking, proteína, creatina, recuperação, hormônios…) e link
-  para o tópico original.
+  para o tópico original. Entende "250mg" e "250 mg" como a mesma coisa.
+- **Análise testosterona (aba da página):** a partir dos relatos sobre TRT e ciclos,
+  mostra os colaterais mais citados, os valores de exames relatados (com a faixa
+  típica de laboratório ao lado) e o ganho de peso relatado, separando reposição,
+  ciclo e autores com perfil parecido com o definido em `perfil` no `config.json`.
+  São relatos de fórum, sem confirmação de dose ou exame; servem para levar
+  perguntas ao médico, não para definir protocolo.
 
 ## Como a coleta se comporta
 
@@ -18,9 +24,11 @@ Ferramenta que roda inteira no GitHub para pesquisar o conteúdo público do
 - Os nomes de usuário viram um código anônimo (`u_3fa9…`) e as citações de outros
   posts são removidas do texto. Nenhum dado de perfil é coletado.
 - É incremental: primeiro pega as novidades e depois continua o histórico de onde
-  parou, até o limite de tópicos de cada execução (500 por padrão, cerca de 30 min).
+  parou, até o limite de tópicos de cada execução (100 por padrão, alguns minutos).
 
-Os subfóruns coletados e os temas ficam em [`config.json`](config.json).
+Os subfóruns coletados e os temas ficam em [`config.json`](config.json). Hoje só o
+subfórum de esteroides está ativo; os outros estão em `foruns_pausados` e voltam
+para a coleta se forem movidos de volta para `foruns`.
 
 ## Primeira configuração
 
@@ -39,7 +47,7 @@ A página fica em `https://<seu-usuario>.github.io/Hipertrofia/`.
 pip install -r requirements.txt
 python -m coletor.coletar --max-topicos 50       # coleta para dados/forum.db
 python -m coletor.buscar '"treino concorrente" hipertrofia'
-python -m coletor.exportar && python -m http.server -d site
+python -m coletor.exportar && python -m coletor.analise && python -m http.server -d site
 python -m pytest -q
 ```
 
