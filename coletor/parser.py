@@ -37,11 +37,11 @@ def ler_lista_de_topicos(html, url_atual):
         if not titulo or tid in topicos or "findComment" in a["href"] or "/page/" in a["href"]:
             continue
         linha = a.find_parent("li") or a.find_parent("tr") or a.find_parent("div")
-        respostas = None
-        if linha:
-            rm = RESPOSTAS_RE.search(linha.get_text(" ", strip=True))
-            if rm:
-                respostas = int(rm.group(1).replace(".", ""))
+        rm = RESPOSTAS_RE.search(linha.get_text(" ", strip=True)) if linha else None
+        # Linhas sem contagem de respostas são de subfóruns (o link é o último post deles).
+        if not rm:
+            continue
+        respostas = int(rm.group(1).replace(".", ""))
         url = urljoin(url_atual, a["href"].split("?")[0].split("#")[0])
         topicos[tid] = {"id": tid, "titulo": titulo, "url": url, "respostas": respostas}
     return list(topicos.values()), proxima_pagina(soup, url_atual)
@@ -56,11 +56,10 @@ def _texto_limpo(el):
 
 def _autor(article):
     for sel in (
-        ".cAuthorPane_author a",
-        ".ipsEntry__username a",
-        "[data-role='author'] a",
+        ".ipsEntry__username .ipsUsername",  # Invision 5
+        ".ipsEntry__username",
+        ".cAuthorPane_author a",  # Invision 4
         "[itemprop='author'] [itemprop='name']",
-        "a[href*='/forum/profile/']",
     ):
         el = article.select_one(sel)
         if el and el.get_text(strip=True):

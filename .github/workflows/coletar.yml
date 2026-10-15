@@ -1,4 +1,5 @@
 name: Coletar e publicar
+# Requer Settings → Pages → Source: "GitHub Actions" para publicar a página de busca.
 
 on:
   schedule:
